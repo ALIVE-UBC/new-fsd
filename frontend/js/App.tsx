@@ -3,6 +3,7 @@ import cookie from "cookie";
 
 import { OpenAPI } from "./api";
 import Dashboard from "./pages/Dashboard";
+import "../../src/input.css";
 
 OpenAPI.interceptors.request.use((request) => {
   const { csrftoken } = cookie.parse(document.cookie);
