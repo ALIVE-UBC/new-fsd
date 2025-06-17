@@ -1,5 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import logo from '../logo.svg'
+import NavBar from '@/components/navbar'
+import { MainFeed } from '@/components/main-feed'
+
 
 export const Route = createFileRoute('/')({
   component: App,
