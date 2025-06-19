@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import logo from '../logo.svg'
-import NavBar from '@/components/navbar'
-import { MainFeed } from '@/components/main-feed'
+import NavBar from '@/frontend/navbar'
+import { MainFeed } from '@/frontend/components/pages/main-feed'
 
 
 export const Route = createFileRoute('/')({
