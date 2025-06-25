@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import logo from '../logo.svg'
+import logo from '../frontend/logo.svg'
 import NavBar from '@/frontend/navbar'
 import { MainFeed } from '@/frontend/components/pages/main-feed'
 
