@@ -19,9 +19,10 @@ import {
 import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: HomeIcon, current: false },
-  { name: 'Profile', href: '/friends', icon: UsersIcon, current: false },
-  { name: 'Settings', href: '/calendar', icon: CalendarIcon, current: false },
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: false },
+  { name: 'Admin', href: '/admin', icon: UsersIcon, current: false },
+  { name: 'Player Data', href: '/playerData', icon: ChatBubbleLeftIcon, current: false },
+  { name: 'Settings', href: '/settings', icon: CalendarIcon, current: false },
 ]
 
 const userNavigation = [
@@ -86,14 +87,14 @@ export default function NavBar({ children }: NavBarProps) {
                       </div>
                     </Transition.Child>
                     <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-black px-6 pb-4">
-                      <div className="flex h-16 shrink-0 items-center">
+                      <div className="flex h-20 shrink-0 items-center">
                          <img
-      className="h-8 w-auto"
-      src={AliveLogo} // Use the imported variable here
-      alt="Alive Company Logo" // Update the alt text for better accessibility
+      className="h-18 w-auto"
+      src={AliveLogo} 
+      alt="Alive Company Logo" 
     />
                       </div>
-                      <nav className="flex flex-1 flex-col">
+                      <nav className="flex flex-2 flex-col justify-center h-full">
                         <ul role="list" className="flex flex-1 flex-col gap-y-7">
                           <li>
                             <ul role="list" className="-mx-2 space-y-1">
@@ -147,17 +148,17 @@ export default function NavBar({ children }: NavBarProps) {
           <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
             {/* Sidebar component, swap this element with another sidebar if you like */}
             <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-black px-6 pb-4">
-              <div className="flex h-16 shrink-0 items-center">
+              <div className="flex h-16 shrink-0 items-center mt-5">
                  <img
-      className="h-8 w-auto"
+      className="ml-3 h-17 w-auto"
       src={AliveLogo} // Use the imported variable here
       alt="Alive Company Logo" // Update the alt text for better accessibility
     />
               </div>
-              <nav className="flex flex-1 flex-col">
+              <nav className="flex flex-1 flex-col justify-center h-full mt-20 ml-10">
                 <ul role="list" className="flex flex-1 flex-col gap-y-7">
                   <li>
-                    <ul role="list" className="-mx-2 space-y-1">
+                    <ul role="list" className="-mx-2 space-y-3 text-center">
                       {navigation.map((item) => (
                         <li key={item.name}>
                           <a
@@ -166,7 +167,7 @@ export default function NavBar({ children }: NavBarProps) {
                               item.current
                                 ? 'bg-gray-50 text-white'
                                 : 'text-white  ',
-                              'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                              'group flex gap-x-3 rounded-md p-2 text-2xl leading-6 font-normal'
                             )}
                           >
                             <item.icon
