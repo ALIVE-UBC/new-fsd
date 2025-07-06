@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Survey Form - FallingSkies Backend{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/styles/survey.css">
+{% endblock %}
+
+{% block content %}
+<div class="title-card">
+    <h1 class="title">UBC Survey Form <small>(fake)</small></h1>
+</div>
+
+<div class="survey-form">
+    <form class="form" action="/codegen/survey" method="post">
+        <div class="form-group">
+            <label for="first_name">First name:</label>
+            <input type="text" id="first_name" name="first_name" required maxlength="256">
+        </div>
+        
+        <div class="form-group">
+            <label for="last_name">Last name:</label>
+            <input type="text" id="last_name" name="last_name" required maxlength="256">
+        </div>
+        
+        <div class="form-group">
+            <label for="school">School:</label>
+            <input type="text" id="school" name="school" required maxlength="256">
+        </div>
+        
+        <div class="form-group">
+            <label for="teacher">Teacher:</label>
+            <input type="text" id="teacher" name="teacher" required maxlength="256">
+        </div>
+        
+        <button class="submit" type="submit">Submit</button>
+    </form>
+</div>
+{% endblock %}

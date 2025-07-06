@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}FallingSkies Backend - FastAPI{% endblock %}
+
+{% block content %}
+<div class="title-card">
+    <h1 class="title">FallingSkies Backend</h1>
+    <p class="subtitle">FastAPI Version</p>
+</div>
+
+<div class="navigation">
+    <div class="nav-item">
+        <h2>Access Code Generation</h2>
+        <p>Generate cryptographically secure access codes for game clients</p>
+        <a href="/codegen/survey" class="button">Start Survey</a>
+    </div>
+    
+    <div class="nav-item">
+        <h2>API Documentation</h2>
+        <p>Interactive API documentation and testing interface</p>
+        <a href="/docs" class="button">View API Docs</a>
+    </div>
+    
+    <div class="nav-item">
+        <h2>Metrics Collection</h2>
+        <p>Game event tracking and analytics endpoints</p>
+        <a href="/docs#/metrics" class="button">View Metrics API</a>
+    </div>
+</div>
+{% endblock %}

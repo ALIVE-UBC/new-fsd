@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Access Code - FallingSkies Backend{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/styles/codegen.css">
+{% endblock %}
+
+{% block content %}
+<div class="code-box">
+    <h1 class="title">Your code is:</h1>
+    <textarea class="code" id="code" readonly rows="8">{{ code }}</textarea>
+</div>
+<div class="code-copy">
+    <button id="copy"><span class="buttontext">Copy the code</span></button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const copy = () => {
+        let textarea = document.querySelector("#code");
+        textarea.select();
+        document.execCommand("copy");
+        
+        // Update button text temporarily
+        const button = document.querySelector("#copy .buttontext");
+        const originalText = button.textContent;
+        button.textContent = "Copied!";
+        setTimeout(() => {
+            button.textContent = originalText;
+        }, 2000);
+    }
+    document.querySelector("#copy").addEventListener("click", copy);
+</script>
+{% endblock %}
