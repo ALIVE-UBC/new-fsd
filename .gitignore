@@ -5,3 +5,7 @@ dist-ssr
 *.local
 count.txt
 .env
+__init__.py
+src/backend/fsd-fastapi/app/__pycache__
+src/backend/fsd-fastapi/app/models/__pycache__
+src/backend/fsd-fastapi/app/routers/__pycache__
