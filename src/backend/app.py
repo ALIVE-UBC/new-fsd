@@ -6,6 +6,10 @@ from mysql.connector import Error
 import json
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+load_dotenv()
+
+print('DEBUG: os.environ:', dict(os.environ))
 
 app = FastAPI()
 
@@ -19,11 +23,14 @@ app.add_middleware(
 
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
+    'port': int(os.getenv('DB_PORT', '3306')),
     'user': os.getenv('DB_USER', 'root'),
     'password': os.getenv('DB_PASSWORD', ''),
     'database': os.getenv('DB_NAME', 'test'),
     'charset': 'utf8mb4'
 }
+
+print('DEBUG: DB_CONFIG:', DB_CONFIG)
 
 def get_db_connection():
     try:
@@ -44,29 +51,20 @@ def get_players():
         if not connection:
             raise HTTPException(status_code=500, detail="Database connection failed")
         cursor = connection.cursor(dictionary=True)
-        query = """
-        SELECT 
-            user_id,
-            datetime,
-            type,
-            params
-        FROM metrics_event 
-        ORDER BY datetime DESC
-        """
+        query = "SELECT * FROM metrics_event"
         cursor.execute(query)
         results = cursor.fetchall()
+        print('DEBUG: results from DB:', results)
+        cursor.execute("SHOW TABLES;")
+        print('DEBUG: tables:', cursor.fetchall())
         players = []
         for row in results:
-            params = json.loads(row['params']) if row['params'] else {}
-            player = {
-                'name': f'Player{row["user_id"]}',
-                'startTime': row['datetime'].strftime('%H:%M'),
-                'endTime': params.get('end_time', 'N/A'),
-                'mode': params.get('mode', 'Unknown'),
-                'duration': params.get('duration', 'N/A'),
-                'status': params.get('status', True)
-            }
-            players.append(player)
+            players.append({
+                'user_id': row['user_id'],
+                'datetime': row['datetime'].isoformat() if isinstance(row['datetime'], datetime) else str(row['datetime']),
+                'type': row['type'],
+                'params': json.loads(row['params']) if row['params'] else {}
+            })
         cursor.close()
         connection.close()
         return players
@@ -98,16 +96,12 @@ def get_player_by_id(user_id: int):
             raise HTTPException(status_code=404, detail="Player not found")
         players = []
         for row in results:
-            params = json.loads(row['params']) if row['params'] else {}
-            player = {
-                'name': f'Player{row["user_id"]}',
-                'startTime': row['datetime'].strftime('%H:%M'),
-                'endTime': params.get('end_time', 'N/A'),
-                'mode': params.get('mode', 'Unknown'),
-                'duration': params.get('duration', 'N/A'),
-                'status': params.get('status', True)
-            }
-            players.append(player)
+            players.append({
+                'user_id': row['user_id'],
+                'datetime': row['datetime'].isoformat() if isinstance(row['datetime'], datetime) else str(row['datetime']),
+                'type': row['type'],
+                'params': json.loads(row['params']) if row['params'] else {}
+            })
         cursor.close()
         connection.close()
         return players
