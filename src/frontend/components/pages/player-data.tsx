@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { type ReactNode } from 'react';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/20/solid';
 
@@ -11,24 +11,63 @@ type Player = {
   status: boolean;
 };
 
-const players: Player[] = [
-  { name: 'Player1', startTime: '12:31', endTime: '14:00', mode: 'Hard', duration: '14min', status: true },
-  { name: 'Player2', startTime: '14:31', endTime: '16:00', mode: 'Medium', duration: '13min', status: true },
-  { name: 'Player3', startTime: '15:31', endTime: '17:21', mode: 'Easy', duration: '45min', status: false },
-  { name: 'Player4', startTime: '16:31', endTime: '18:31', mode: 'Hard', duration: '13min', status: false },
-  { name: 'Player5', startTime: '17:31', endTime: '11:24', mode: 'Easy', duration: '20min', status: true },
-  { name: 'Player6', startTime: '18:31', endTime: '20:45', mode: 'Medium', duration: '25min', status: false },
-  { name: 'Player6', startTime: '18:31', endTime: '20:45', mode: 'Medium', duration: '25min', status: false },
-  { name: 'Player6', startTime: '18:31', endTime: '20:45', mode: 'Medium', duration: '25min', status: false },
-  { name: 'Player6', startTime: '18:31', endTime: '20:45', mode: 'Medium', duration: '25min', status: false },
-];
+async function fetchPlayerData(): Promise<Player[]> {
+  try {
+    const response = await fetch('http://localhost:8028/metrics/player-data');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching player data:', error);
+    return [];
+  }
+}
 
 function PlayerTableComponent() {
-  const [currentPage, setCurrentPage] = useState(2);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchPlayerData();
+        setPlayers(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">Loading player data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-red-500">Error: {error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
-      {/* Top Controls */}
       <div className="flex items-center justify-between">
         <input
           type="text"
@@ -40,7 +79,6 @@ function PlayerTableComponent() {
         </button>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto rounded-md border border-gray-200">
         <table className="min-w-full text-sm text-gray-800">
           <thead className="bg-gray-100 text-left text-gray-500 font-medium">
@@ -53,7 +91,7 @@ function PlayerTableComponent() {
               <th className="px-4 py-3">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody>
             {players.map((player, idx) => (
               <tr key={idx} className="hover:bg-gray-50">
                 <td className="px-4 py-2">{player.name}</td>
@@ -74,7 +112,6 @@ function PlayerTableComponent() {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-center gap-4 pt-4 text-sm text-gray-600">
         <button className="hover:underline">&lt; Previous</button>
         <button className="text-gray-500">1</button>
@@ -85,6 +122,5 @@ function PlayerTableComponent() {
     </div>
   );
 }
-
 
 export const PlayerData: ReactNode = <PlayerTableComponent />;

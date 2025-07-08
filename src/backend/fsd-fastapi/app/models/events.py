@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, JSON
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, JSON
 from sqlalchemy.sql import func
 from app.database import Base
 from enum import Enum
@@ -35,10 +35,10 @@ class EventType(str, Enum):
     ASSESSMENT_END = "ASSESSMENT_END"
 
 class Event(Base):
-    __tablename__ = "events"
+    __tablename__ = "metrics_event"
     
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True)
     user_id = Column(Integer, nullable=False)
-    datetime = Column(DateTime(timezone=True), server_default=func.now())
+    datetime = Column(DateTime(6), nullable=False)
     type = Column(String(32), nullable=False)
-    params = Column(JSON, default=dict)
+    params = Column(JSON, nullable=False)

@@ -1,13 +1,20 @@
 import os
 from pydantic_settings import BaseSettings
+from typing import Optional
 
 class Settings(BaseSettings):
-    debug: bool = True
-    codegen_jwt_secret: str = "team-skyfall-debug-key-do-not-use-in-production"
-    database_url: str = "sqlite+aiosqlite:///./fsd.db"
+    codegen_jwt_secret: str = "your-secret-key-here"
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    # Use the same database as your existing Django backend
+    # Update these values to match your Django database settings
+    database_host: str = "localhost"
+    database_port: int = 3306
+    database_user: str = "root"
+    database_password: str = "password"
+    database_name: str = "fsd"
+    
+    @property
+    def database_url(self) -> str:
+        return f"mysql+asyncmy://{self.database_user}:{self.database_password}@{self.database_host}:{self.database_port}/{self.database_name}"
 
 settings = Settings()
