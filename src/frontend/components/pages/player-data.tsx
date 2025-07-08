@@ -15,10 +15,26 @@ function PlayerTableComponent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchPlayers();
   }, []);
+
+  const formatDateTime = (dateTimeString: string) => {
+    try {
+      const date = new Date(dateTimeString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}, ${hours}:${minutes}`;
+    } catch (error) {
+      return dateTimeString;
+    }
+  };
 
   const fetchPlayers = async () => {
     try {
@@ -43,6 +59,27 @@ function PlayerTableComponent() {
     player.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
     JSON.stringify(player.params).toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPlayers = filteredPlayers.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const goToPreviousPage = () => {
+    goToPage(currentPage - 1);
+  };
+
+  const goToNextPage = () => {
+    goToPage(currentPage + 1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   if (loading) {
     return (
@@ -83,6 +120,7 @@ function PlayerTableComponent() {
           className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-1/3"
         />
       </div>
+
       <div className="overflow-x-auto rounded-md border border-gray-200">
         <table className="min-w-full text-sm text-gray-800">
           <thead className="bg-gray-100 text-left text-gray-500 font-medium">
@@ -94,17 +132,17 @@ function PlayerTableComponent() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {filteredPlayers.length === 0 ? (
+            {currentPlayers.length === 0 ? (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
                   {searchTerm ? 'No players found matching your search.' : 'No players found.'}
                 </td>
               </tr>
             ) : (
-              filteredPlayers.map((player, idx) => (
+              currentPlayers.map((player, idx) => (
                 <tr key={idx} className="hover:bg-gray-50">
                   <td className="px-4 py-2">{player.user_id}</td>
-                  <td className="px-4 py-2">{player.datetime}</td>
+                  <td className="px-4 py-2">{formatDateTime(player.datetime)}</td>
                   <td className="px-4 py-2">{player.type}</td>
                   <td className="px-4 py-2 whitespace-pre-wrap max-w-xs">
                     <pre className="text-xs bg-gray-50 rounded p-2 overflow-x-auto">{JSON.stringify(player.params, null, 2)}</pre>
@@ -115,6 +153,57 @@ function PlayerTableComponent() {
           </tbody>
         </table>
       </div>
+
+      {filteredPlayers.length > 0 && (
+        <div className="flex items-center justify-center gap-4 pt-4 text-sm text-gray-600">
+          <button 
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1}
+            className={`hover:underline ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : ''}`}
+          >
+            &lt; Previous
+          </button>
+          
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNum = totalPages - 4 + i;
+            } else {
+              pageNum = currentPage - 2 + i;
+            }
+            
+            return (
+              <button
+                key={pageNum}
+                onClick={() => goToPage(pageNum)}
+                className={`px-2 py-1 rounded ${
+                  currentPage === pageNum
+                    ? 'border border-gray-300 bg-white font-semibold'
+                    : 'text-gray-500 hover:underline'
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+          
+          {totalPages > 5 && currentPage < totalPages - 2 && (
+            <span className="text-gray-400">…</span>
+          )}
+          
+          <button 
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+            className={`hover:underline ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : ''}`}
+          >
+            Next &gt;
+          </button>
+        </div>
+      )}
     </div>
   );
 }
