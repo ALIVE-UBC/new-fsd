@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
+from pydantic import BaseModel
 import mysql.connector
 from mysql.connector import Error
 import json
@@ -32,6 +33,12 @@ DB_CONFIG = {
 
 print('DEBUG: DB_CONFIG:', DB_CONFIG)
 
+class MetricEvent(BaseModel):
+    UserId: int
+    Type: str
+    Params: dict
+    Timestamp: int = None
+
 def get_db_connection():
     try:
         connection = mysql.connector.connect(**DB_CONFIG)
@@ -51,7 +58,7 @@ def get_players():
         if not connection:
             raise HTTPException(status_code=500, detail="Database connection failed")
         cursor = connection.cursor(dictionary=True)
-        query = "SELECT * FROM metrics_event"
+        query = "SELECT * FROM metrics_event ORDER BY datetime DESC"
         cursor.execute(query)
         results = cursor.fetchall()
         print('DEBUG: results from DB:', results)
@@ -105,6 +112,48 @@ def get_player_by_id(user_id: int):
         cursor.close()
         connection.close()
         return players
+    except Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+
+@app.post("/api/metrics")
+async def add_metric_event(request: Request):
+    try:
+        # Get raw body as string
+        body = await request.body()
+        body_str = body.decode('utf-8')
+        
+        # Parse the JSON string
+        event_data = json.loads(body_str)
+        
+        # Extract fields with proper case handling
+        user_id = event_data.get('UserId', 0)
+        event_type = event_data.get('Type', '')
+        params = event_data.get('Params', {})
+        
+        connection = get_db_connection()
+        if not connection:
+            raise HTTPException(status_code=500, detail="Database connection failed")
+        cursor = connection.cursor()
+        
+        query = """
+        INSERT INTO metrics_event (user_id, datetime, type, params)
+        VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(query, (
+            user_id,
+            datetime.now(),
+            event_type,
+            json.dumps(params)
+        ))
+        
+        connection.commit()
+        event_id = cursor.lastrowid
+        cursor.close()
+        connection.close()
+        
+        return {"success": True, "id": event_id, "message": "Metric event recorded"}
     except Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
