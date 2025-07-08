@@ -21,7 +21,7 @@ DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'user': os.getenv('DB_USER', 'root'),
     'password': os.getenv('DB_PASSWORD', ''),
-    'database': os.getenv('DB_NAME', 'your_database_name'),
+    'database': os.getenv('DB_NAME', 'test'),
     'charset': 'utf8mb4'
 }
 
