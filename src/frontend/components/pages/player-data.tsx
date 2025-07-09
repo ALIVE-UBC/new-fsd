@@ -1,90 +1,211 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { type ReactNode } from 'react';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/20/solid';
+
+// DB schema: user_id, datetime, type, params
 
 type Player = {
-  name: string;
-  startTime: string;
-  endTime: string;
-  mode: string;
-  duration: string;
-  status: boolean;
+  user_id: number;
+  datetime: string;
+  type: string;
+  params: any;
 };
 
-const players: Player[] = [
-  { name: 'Player1', startTime: '12:31', endTime: '14:00', mode: 'Hard', duration: '14min', status: true },
-  { name: 'Player2', startTime: '14:31', endTime: '16:00', mode: 'Medium', duration: '13min', status: true },
-  { name: 'Player3', startTime: '15:31', endTime: '17:21', mode: 'Easy', duration: '45min', status: false },
-  { name: 'Player4', startTime: '16:31', endTime: '18:31', mode: 'Hard', duration: '13min', status: false },
-  { name: 'Player5', startTime: '17:31', endTime: '11:24', mode: 'Easy', duration: '20min', status: true },
-  { name: 'Player6', startTime: '18:31', endTime: '20:45', mode: 'Medium', duration: '25min', status: false },
-  { name: 'Player6', startTime: '18:31', endTime: '20:45', mode: 'Medium', duration: '25min', status: false },
-  { name: 'Player6', startTime: '18:31', endTime: '20:45', mode: 'Medium', duration: '25min', status: false },
-  { name: 'Player6', startTime: '18:31', endTime: '20:45', mode: 'Medium', duration: '25min', status: false },
-];
-
 function PlayerTableComponent() {
-  const [currentPage, setCurrentPage] = useState(2);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
+  useEffect(() => {
+    fetchPlayers();
+  }, []);
+
+  const formatDateTime = (dateTimeString: string) => {
+    try {
+      const date = new Date(dateTimeString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}, ${hours}:${minutes}`;
+    } catch (error) {
+      return dateTimeString;
+    }
+  };
+
+  const fetchPlayers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('http://localhost:5001/api/players');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setPlayers(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch players');
+      console.error('Error fetching players:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredPlayers = players.filter(player =>
+    player.user_id.toString().includes(searchTerm) ||
+    player.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    JSON.stringify(player.params).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPlayers = filteredPlayers.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const goToPreviousPage = () => {
+    goToPage(currentPage - 1);
+  };
+
+  const goToNextPage = () => {
+    goToPage(currentPage + 1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">Loading players...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-red-500">
+            Error: {error}
+            <button 
+              onClick={fetchPlayers}
+              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
-      {/* Top Controls */}
       <div className="flex items-center justify-between">
         <input
           type="text"
           placeholder="Search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-1/3"
         />
-        <button className="flex items-center gap-1 border border-gray-300 px-3 py-1.5 rounded-md text-sm text-gray-600">
-          Filter <span className="ml-1">▼</span>
-        </button>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto rounded-md border border-gray-200">
         <table className="min-w-full text-sm text-gray-800">
           <thead className="bg-gray-100 text-left text-gray-500 font-medium">
             <tr>
-              <th className="px-4 py-3">Player</th>
-              <th className="px-4 py-3">Start Time</th>
-              <th className="px-4 py-3">End Time</th>
-              <th className="px-4 py-3">Mode</th>
-              <th className="px-4 py-3">Duration</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">User ID</th>
+              <th className="px-4 py-3">Datetime</th>
+              <th className="px-4 py-3">Type</th>
+              <th className="px-4 py-3">Params</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {players.map((player, idx) => (
-              <tr key={idx} className="hover:bg-gray-50">
-                <td className="px-4 py-2">{player.name}</td>
-                <td className="px-4 py-2">{player.startTime}</td>
-                <td className="px-4 py-2">{player.endTime}</td>
-                <td className="px-4 py-2">{player.mode}</td>
-                <td className="px-4 py-2">{player.duration}</td>
-                <td className="px-4 py-2">
-                  {player.status ? (
-                    <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <XCircleIcon className="h-5 w-5 text-red-500" />
-                  )}
+            {currentPlayers.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                  {searchTerm ? 'No players found matching your search.' : 'No players found.'}
                 </td>
               </tr>
-            ))}
+            ) : (
+              currentPlayers.map((player, idx) => (
+                <tr key={idx} className="hover:bg-gray-50">
+                  <td className="px-4 py-2">{player.user_id}</td>
+                  <td className="px-4 py-2">{formatDateTime(player.datetime)}</td>
+                  <td className="px-4 py-2">{player.type}</td>
+                  <td className="px-4 py-2 whitespace-pre-wrap max-w-xs">
+                    <pre className="text-xs bg-gray-50 rounded p-2 overflow-x-auto">{JSON.stringify(player.params, null, 2)}</pre>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center gap-4 pt-4 text-sm text-gray-600">
-        <button className="hover:underline">&lt; Previous</button>
-        <button className="text-gray-500">1</button>
-        <button className="border border-gray-300 px-2 py-1 rounded bg-white font-semibold">2</button>
-        <span className="text-gray-400">…</span>
-        <button className="hover:underline">Next &gt;</button>
-      </div>
+      {filteredPlayers.length > 0 && (
+        <div className="flex items-center justify-center gap-4 pt-4 text-sm text-gray-600">
+          <button 
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1}
+            className={`hover:underline ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : ''}`}
+          >
+            &lt; Previous
+          </button>
+          
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNum = totalPages - 4 + i;
+            } else {
+              pageNum = currentPage - 2 + i;
+            }
+            
+            return (
+              <button
+                key={pageNum}
+                onClick={() => goToPage(pageNum)}
+                className={`px-2 py-1 rounded ${
+                  currentPage === pageNum
+                    ? 'border border-gray-300 bg-white font-semibold'
+                    : 'text-gray-500 hover:underline'
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+          
+          {totalPages > 5 && currentPage < totalPages - 2 && (
+            <span className="text-gray-400">…</span>
+          )}
+          
+          <button 
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+            className={`hover:underline ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : ''}`}
+          >
+            Next &gt;
+          </button>
+        </div>
+      )}
     </div>
   );
 }
-
 
 export const PlayerData: ReactNode = <PlayerTableComponent />;
