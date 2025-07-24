@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from pydantic import BaseModel
@@ -8,6 +8,8 @@ import json
 import os
 from datetime import datetime
 from dotenv import load_dotenv
+from passlib.hash import django_pbkdf2_sha256
+
 load_dotenv()
 
 print('DEBUG: os.environ:', dict(os.environ))
@@ -46,6 +48,9 @@ def get_db_connection():
     except Error as e:
         print(f"Error connecting to MySQL: {e}")
         return None
+    
+def verify_django_password(plain_password: str, hashed: str) -> bool:
+    return django_pbkdf2_sha256.verify(plain_password, hashed)
 
 @app.get("/")
 def home():
@@ -158,3 +163,202 @@ async def add_metric_event(request: Request):
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+    
+
+@app.post("/api/login")
+async def login(username: str = Form(...), password: str = Form(...)):
+    print("--- LOGIN ENDPOINT WAS HIT ---")
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id, password FROM auth_user WHERE username = %s", (username,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if (not user) or (not django_pbkdf2_sha256.verify(password, user["password"])):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    return {"user_id": user["id"], "message": "Login successful"}
+
+@app.get("/api/avgCompletionTime")
+def avg_completion_time():
+    try:
+        connection = get_db_connection()
+        if not connection:
+            raise HTTPException(status_code=500, detail="Database connection failed")
+        cursor = connection.cursor(dictionary=True)
+        query = """
+        WITH CompletedSessions AS (
+            SELECT 
+                starts.user_id, 
+                starts.datetime AS start_time,
+                (
+                    SELECT MIN(ends.datetime)
+                    FROM metrics_event AS ends
+                    WHERE ends.user_id = starts.user_id
+                        AND ends.type = 'ASSESSMENT_END'
+                        AND ends.datetime > starts.datetime
+                ) AS end_time
+            FROM metrics_event AS starts
+            WHERE starts.type = 'ASSESSMENT_START'
+        )
+        SELECT 
+            SEC_TO_TIME(AVG(TIMESTAMPDIFF(SECOND, start_time, end_time))) AS avg_completion_time,
+            AVG(TIMESTAMPDIFF(SECOND, start_time, end_time)) AS avg_completion_seconds
+        FROM CompletedSessions
+        WHERE end_time IS NOT NULL;
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        return {
+            "avg_completion_time": result["avg_completion_time"],
+            "avg_completion_seconds": result["avg_completion_seconds"]
+        }
+    except Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+    
+    from fastapi import FastAPI, HTTPException
+# Assuming get_db_connection is in a file named 'database'
+# from database import get_db_connection
+
+# This is a placeholder for your actual DB connection function and app instance
+# app = FastAPI()
+# def get_db_connection(): ...
+
+@app.get("/api/mostVisitedArea")
+async def most_visited_area():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+            SELECT
+                JSON_UNQUOTE(JSON_EXTRACT(params, '$.Name')) AS zone_name,
+                COUNT(*) AS visit_count
+            FROM
+                metrics_event
+            WHERE
+                type = 'ZONE_ENTER'
+            GROUP BY
+                zone_name
+            ORDER BY
+                visit_count DESC
+            LIMIT 1;
+        """
+        
+        cursor.execute(query)
+        result = cursor.fetchone()
+        
+        if not result:
+            return {"message": "No ZONE_ENTER events found."}
+            
+        return result
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+        
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+@app.get("/api/mostPopularFinalClaim")
+async def most_popular_final_claim():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT
+                JSON_UNQUOTE(JSON_EXTRACT(params, '$.FinalClaim')) AS final_claim,
+                COUNT(*) AS claim_count
+            FROM
+                metrics_event
+            WHERE
+                type = 'ASSESSMENT_UPDATE'
+                AND JSON_EXTRACT(params, '$.FinalClaim') IS NOT NULL
+            GROUP BY
+                final_claim
+            ORDER BY
+                claim_count DESC
+            LIMIT 1;
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if not result:
+            return {"message": "No final claims found."}
+        return result
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+    
+@app.get("/api/finalHypothesisCount")
+async def final_hypothesis_count():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT
+                JSON_UNQUOTE(JSON_EXTRACT(params, '$.FinalClaim')) AS final_claim,
+                COUNT(*) AS claim_count
+            FROM
+                metrics_event
+            WHERE
+                type = 'ASSESSMENT_UPDATE'
+                AND JSON_EXTRACT(params, '$.FinalClaim') IS NOT NULL
+            GROUP BY
+                final_claim
+            ORDER BY
+                claim_count DESC;
+        """
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return results
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+@app.get("/api/mostCommonlyFoundEvidence")
+async def most_commonly_found_evidence():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT
+                JSON_UNQUOTE(JSON_EXTRACT(params, '$.ItemName')) AS item_name,
+                COUNT(*) AS item_count
+            FROM
+                metrics_event
+            WHERE
+                type = 'BACKPACK_ADD'
+                AND JSON_EXTRACT(params, '$.ItemName') IS NOT NULL
+            GROUP BY
+                item_name
+            ORDER BY
+                item_count DESC;
+        """
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return results
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()

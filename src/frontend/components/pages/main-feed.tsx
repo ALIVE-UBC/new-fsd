@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardHeader,
@@ -10,80 +10,187 @@ import { Button } from "../ui/button";
 import AliveMap from '@/assets/alive-map.png';
 import ExampleChart from '@/assets/ex.png';
 import HeatMap from '@/assets/minimap2_font bigger@2x.jpg';
+import { FinalHypothesisPiechart } from "./final-hypothesis-piechart";
+import { MostCommonlyFoundEvidence } from "./most-popular-evidence-piechart";
 
 
+export function MainFeed() {
+  const [avgCompletionTime, setAvgCompletionTime] = useState<string | null>(null);
+  const [mostVisitedArea, setMostVisitedArea] = useState<string | null>(null);
+  const [mostPopularFinalClaim, setMostPopularFinalClaim] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  const fetchAvgCompletionTime = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('http://localhost:5001/api/avgCompletionTime');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setAvgCompletionTime(data.avg_completion_time || null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch average completion time');
+      setAvgCompletionTime(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const fetchMostVisitedArea = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    const response = await fetch('http://localhost:5001/api/mostVisitedArea');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    setMostVisitedArea(data.zone_name);
+    console.log('Most Visited Area:', data.zone_name);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to fetch most visited area');
+    console.error('Error fetching most visited area:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-// Export as a ReactNode so it can be passed directly as a child
-export const MainFeed: ReactNode = (
-  <main className="flex-1 p-6 space-y-6">
-    {/* Stats Row */}
-    <div className="flex flex-wrap gap-6">
-      {[
-        { title: "Most Completion Time", value: "45 mins", change: "+12.5%", description: "Trending up", positive: true },
-        { title: "Most Visited Area", value: "Alive Lab", change: "-20%", description: "some description", positive: false },
-        { title: "Some Data", value: "1234", change: "+12.5%", description: "Strong user retention", positive: true },
-      ].map(({ title, value, change, description, positive }) => (
-        <Card key={title} className="flex-1 min-w-[14rem] text-black">
-          <CardHeader className="flex items-center justify-between">
-            <CardTitle className="text-sm">{title}</CardTitle>
-            <span className={positive ? "text-green-400" : "text-red-400"}>{change}</span>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{value}</p>
-            <p className="mt-1 text-xs text-gray-400">{description}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+const fetchMostPopularFinalClaim = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    const response = await fetch('http://localhost:5001/api/mostPopularFinalClaim');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    setMostPopularFinalClaim(
+  data.final_claim
+    ? data.final_claim.charAt(0).toUpperCase() + data.final_claim.slice(1).toLowerCase()
+    : null
+  );
+    console.log('Most Popular Final Claim:', data.final_claim);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to fetch most popular final claim');
+    console.error('Error fetching most popular final claim:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-    {/* Charts: first two side by side */}
-    <div className="flex flex-col md:flex-row gap-6">
-      {[1, 2].map((idx) => (
-        <Card key={idx} className="flex-1 text-black">
-          <CardHeader className="flex items-center justify-between mb-4">
-            <CardTitle>Total Visitors</CardTitle>
-            <div className="space-x-2">
-              {['Last 3 months', 'Last 30 days', 'Last 7 days'].map((label) => (
-                <Button key={label} variant="ghost" size="sm">
-                  {label}
-                </Button>
-              ))}
-            </div>
-          </CardHeader>
-          <CardContent className="h-64 flex items-center justify-center">
-            <img
-              src={HeatMap}
-              alt="Data visualization placeholder"
-              className="h-full w-full object-contain"
-            />
-          </CardContent>
-          <CardFooter />
-        </Card>
-      ))}
-    </div>
+  useEffect(() => {
+    fetchAvgCompletionTime();
+    fetchMostVisitedArea();
+    fetchMostPopularFinalClaim();
+  }, []);
 
-    {/* Third chart full width below */}
-    <Card className="text-black">
+  return (
+    <main className="flex-1 p-6 space-y-6">
+      {/* Stats Row */}
+      <div className="flex flex-wrap gap-6">
+        {[
+          {
+            title: "Average Completion Time",
+            value: loading
+              ? "Loading..."
+              : error
+              ? "Error"
+              : `${avgCompletionTime} seconds`
+              ? `${avgCompletionTime} seconds`
+              : "N/A",
+          },
+          { title: "Most Visited Area",  value: loading
+              ? "Loading..."
+              : error
+              ? "Error"
+              : `${mostVisitedArea}`
+              ? `${mostVisitedArea}`
+              : "N/A",},
+          { title: "Most Common Final Claim", value: loading
+              ? "Loading..."
+              : error
+              ? "Error"
+              : `${mostPopularFinalClaim}`
+              ? `${mostPopularFinalClaim}`
+              : "N/A", },
+        ].map(({ title, value }) => (
+          <Card key={title} className="flex-1 min-w-[14rem] text-black">
+            <CardHeader className="flex items-center justify-between">
+              <CardTitle className="text-sm">{title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-semibold">{value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div>
+         <FinalHypothesisPiechart />
+      </div>
+      <div>
+        <MostCommonlyFoundEvidence />
+      </div>
+
+      {/* Charts: first two side by side */}
+      <div className="flex flex-col md:flex-row gap-6">
+  {[1, 2].map((idx) => (
+    <Card key={idx} className="flex-1 text-black">
       <CardHeader className="flex items-center justify-between mb-4">
-        <CardTitle>Overall Trends</CardTitle>
+        <CardTitle>Total Visitors</CardTitle>
         <div className="space-x-2">
-          {['Last Year', 'Last 6 months', 'Last Month'].map((label) => (
+          {['Last 3 months', 'Last 30 days', 'Last 7 days'].map((label) => (
             <Button key={label} variant="ghost" size="sm">
               {label}
             </Button>
           ))}
         </div>
       </CardHeader>
-      <CardContent className="h-64 flex items-center justify-center text-gray-500">
-       <img
-              src={ExampleChart}
-              alt="Data visualization placeholder"
-              className="h-full w-full object-contain"
-            />
+      <CardContent className="h-64 flex items-center justify-center">
+        {idx === 1 ? (
+          <img
+            src={HeatMap}
+            alt="Data visualization placeholder"
+            className="h-full w-full object-contain"
+          />
+        ) : (
+          <img
+            src={HeatMap}
+            alt="Data visualization placeholder"
+            className="h-full w-full object-contain"
+          />
+        )}
       </CardContent>
       <CardFooter />
     </Card>
-  </main>
-);
+  ))}
+</div>
+
+      {/* Third chart full width below */}
+      <Card className="text-black">
+        <CardHeader className="flex items-center justify-between mb-4">
+          <CardTitle>Overall Trends</CardTitle>
+          <div className="space-x-2">
+            {['Last Year', 'Last 6 months', 'Last Month'].map((label) => (
+              <Button key={label} variant="ghost" size="sm">
+                {label}
+              </Button>
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent className="h-64 flex items-center justify-center text-gray-500">
+          <img
+            src={ExampleChart}
+            alt="Data visualization placeholder"
+            className="h-full w-full object-contain"
+          />
+        </CardContent>
+        <CardFooter />
+      </Card>
+    </main>
+  );
+}
+
+export const MainFeedPage: React.ReactNode = <MainFeed />;

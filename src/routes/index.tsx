@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { Login } from '@/frontend/components/pages/login';
 
 
 export const Route = createFileRoute('/')({
@@ -7,8 +8,6 @@ export const Route = createFileRoute('/')({
 
 function App() {
   return (
-    <div className="text-center">
-  hello world
-    </div>
+    <Login />
   )
 }

@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import AliveLogo from '@/assets/alive-logo.png';
+import AliveLogoBlk from '@/assets/alive-logo-blk.png';
 import { Fragment, useState } from 'react'
 import type { ReactNode } from 'react';
 import { Dialog, Menu, Transition } from '@headlessui/react'
@@ -22,7 +23,6 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: false },
   { name: 'Admin', href: '/admin', icon: UsersIcon, current: false },
   { name: 'Player Data', href: '/playerData', icon: ChatBubbleLeftIcon, current: false },
-  { name: 'Settings', href: '/settings', icon: CalendarIcon, current: false },
 ]
 
 const userNavigation = [
@@ -30,7 +30,7 @@ const userNavigation = [
   { name: 'Sign out', href: '#' },
 ]
 
-const userName = 'Sangita'
+const userName = 'Alive'
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -214,7 +214,7 @@ export default function NavBar({ children }: NavBarProps) {
   
               <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
                 <form className="relative flex flex-1" action="#" method="GET">
-                  <label htmlFor="search-field" className="sr-only">
+                  {/* <label htmlFor="search-field" className="sr-only">
                     Search
                   </label>
                   <MagnifyingGlassIcon
@@ -227,7 +227,7 @@ export default function NavBar({ children }: NavBarProps) {
                     placeholder="Search..."
                     type="search"
                     name="search"
-                  />
+                  /> */}
                 </form>
                 <div className="flex items-center gap-x-4 lg:gap-x-6">
                   <button type="button" className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
@@ -248,7 +248,7 @@ export default function NavBar({ children }: NavBarProps) {
                       <span className="sr-only">Open user menu</span>
                       <img
                         className="h-8 w-8 rounded-full bg-gray-50"
-                        src="https://www.adventurealan.com/wp-content/uploads/2021/04/IMG_7615-scaled.jpeg"
+                        src={AliveLogoBlk} 
                         alt=""
                       />
                       <span className="hidden lg:flex lg:items-center">

@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import NavBar from '@/frontend/navbar';
-import { MainFeed } from '@/frontend/components/pages/main-feed';
+import { MainFeedPage } from '@/frontend/components/pages/main-feed';
 
 export function DashboardPage() {
-  return <NavBar children={MainFeed} />;
+  return <NavBar children={MainFeedPage} />;
 }
 
 export const Route = createFileRoute('/dashboard/')({
