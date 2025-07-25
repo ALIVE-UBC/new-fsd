@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { PencilSquareIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 type ModelItem = {

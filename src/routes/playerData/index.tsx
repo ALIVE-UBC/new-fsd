@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import NavBar from '@/frontend/navbar-simple.tsx';
+import NavBar from '@/frontend/navbar.tsx';
 import { PlayerData } from '@/frontend/components/pages/player-data.tsx';
 
 

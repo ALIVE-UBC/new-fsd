@@ -7,7 +7,7 @@ import {
   CardFooter,
 } from "../ui/card";
 import { Button } from "../ui/button";
-import AliveMap from '@/assets/alive-map.png';
+
 import ExampleChart from '@/assets/ex.png';
 import HeatMap from '@/assets/minimap2_font bigger@2x.jpg';
 import { FinalHypothesisPiechart } from "./final-hypothesis-piechart";

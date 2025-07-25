@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+
 import AliveLogo from '@/assets/alive-logo.png';
 import AliveLogoBlk from '@/assets/alive-logo-blk.png';
 import { Fragment, useState } from 'react'
@@ -7,17 +7,13 @@ import { Dialog, Menu, Transition } from '@headlessui/react'
 import {
   Bars3Icon,
   BellIcon,
-  CalendarIcon,
   Cog6ToothIcon,
   HomeIcon,
   UsersIcon,
-  ChatBubbleLeftRightIcon,
   XMarkIcon,
   ChatBubbleLeftIcon,
-  ChatBubbleOvalLeftIcon,
-  ChatBubbleOvalLeftEllipsisIcon,
 } from '@heroicons/react/24/outline'
-import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { ChevronDownIcon } from '@heroicons/react/20/solid'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: false },
@@ -232,7 +228,7 @@ export default function NavBar({ children }: NavBarProps) {
                 <div className="flex items-center gap-x-4 lg:gap-x-6">
                   <button type="button" className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
                     <span className="sr-only">View notifications</span>
-                    <ChatBubbleOvalLeftEllipsisIcon className="h-6 w-6" aria-hidden="true" />
+                    <BellIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                   <button type="button" className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
                     <span className="sr-only">View notifications</span>
