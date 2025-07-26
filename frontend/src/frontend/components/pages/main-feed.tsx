@@ -25,7 +25,7 @@ export function MainFeed() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://localhost:5001/api/avgCompletionTime');
+      const response = await fetch('https://alive.educ.ubc.ca/fsd2/api/avgCompletionTime');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -43,7 +43,7 @@ export function MainFeed() {
   try {
     setLoading(true);
     setError(null);
-    const response = await fetch('http://localhost:5001/api/mostVisitedArea');
+    const response = await fetch('https://alive.educ.ubc.ca/fsd2/api/mostVisitedArea');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -62,7 +62,7 @@ const fetchMostPopularFinalClaim = async () => {
   try {
     setLoading(true);
     setError(null);
-    const response = await fetch('http://localhost:5001/api/mostPopularFinalClaim');
+    const response = await fetch('https://alive.educ.ubc.ca/fsd2/api/mostPopularFinalClaim');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

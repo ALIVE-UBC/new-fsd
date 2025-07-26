@@ -34,7 +34,7 @@ export function MostCommonlyFoundEvidence() {
   const fetchMostCommonlyFoundEvidence = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5001/api/mostCommonlyFoundEvidence');
+      const response = await fetch('https://alive.educ.ubc.ca/fsd2/api/mostCommonlyFoundEvidence');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

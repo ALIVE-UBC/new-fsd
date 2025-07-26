@@ -34,7 +34,7 @@ export function FinalHypothesisPiechart() {
     const fetchFinalHypothesisCount = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5001/api/finalHypothesisCount');
+        const response = await fetch('https://alive.educ.ubc.ca/fsd2/api/finalHypothesisCount');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
