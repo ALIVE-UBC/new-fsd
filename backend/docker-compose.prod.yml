@@ -11,8 +11,12 @@ services:
       - DB_USER=root
       - DB_PASSWORD=password
       - DB_NAME=alive_dashboard
-    volumes:
-      - .:/app
     restart: unless-stopped
     extra_hosts:
-      - "host.docker.internal:host-gateway" 
+      - "host.docker.internal:host-gateway"
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge 
