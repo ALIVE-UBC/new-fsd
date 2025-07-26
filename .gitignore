@@ -6,3 +6,9 @@ dist-ssr
 count.txt
 .env
 src/backend/__pycache__
+backend/__pycache__/app.cpython-36.pyc
+backend/fsdvenv/
+backend/requirements-backend.txt
+backend/venv/
+frontend/.env.production
+‎backend/deploy-vm.sh
