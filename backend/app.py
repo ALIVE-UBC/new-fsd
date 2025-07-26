@@ -25,11 +25,11 @@ app.add_middleware(
 )
 
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
+    'host': os.getenv('DB_HOST', '127.0.0.1'),
     'port': int(os.getenv('DB_PORT', '3306')),
-    'user': os.getenv('DB_USER', 'root'),
+    'user': os.getenv('DB_USER', 'fsd'),
     'password': os.getenv('DB_PASSWORD', ''),
-    'database': os.getenv('DB_NAME', 'test'),
+    'database': os.getenv('DB_NAME', 'fsd'),
     'charset': 'utf8mb4'
 }
 
