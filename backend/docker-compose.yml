@@ -4,7 +4,7 @@ services:
   backend:
     build: .
     ports:
-      - "8000:8000"
+      - "5001:5001"
     environment:
       - DB_HOST=db
       - DB_PORT=3306
