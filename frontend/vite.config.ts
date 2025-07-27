@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
+  base: '/fsd2/',
   plugins: [
     TanStackRouterVite({ autoCodeSplitting: true }),
     viteReact(),

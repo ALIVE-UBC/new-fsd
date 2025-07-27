@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import AliveLogo from '../assets/alive-logo.png';
 import AliveLogoBlk from '../assets/alive-logo-blk.png';
 import { Dialog, Menu, Transition } from '@headlessui/react'
+import { Link } from '@tanstack/react-router'
 import {
   Bars3Icon,
   BellIcon,
@@ -22,8 +23,8 @@ const navigation = [
 ]
 
 const userNavigation = [
-  { name: 'Your profile', href: '#' },
-  { name: 'Sign out', href: '#' },
+  { name: 'Your profile', href: '/dashboard' },
+  { name: 'Sign out', href: '/login' },
 ]
 
 const userName = 'Alive'
@@ -96,8 +97,8 @@ export default function NavBar({ children }: NavBarProps) {
                             <ul role="list" className="-mx-2 space-y-1">
                               {navigation.map((item) => (
                                 <li key={item.name}>
-                                  <a
-                                    href={item.href}
+                                  <Link
+                                    to={item.href}
                                     className={classNames(
                                       item.current
                                         ? 'bg-gray-50 text-indigo-600'
@@ -113,7 +114,7 @@ export default function NavBar({ children }: NavBarProps) {
                                       aria-hidden="true"
                                     />
                                     {item.name}
-                                  </a>
+                                  </Link>
                                 </li>
                               ))}
                             </ul>
@@ -157,8 +158,8 @@ export default function NavBar({ children }: NavBarProps) {
                     <ul role="list" className="-mx-2 space-y-3 text-center">
                       {navigation.map((item) => (
                         <li key={item.name}>
-                          <a
-                            href={item.href}
+                          <Link
+                            to={item.href}
                             className={classNames(
                               item.current
                                 ? 'bg-gray-50 text-white'
@@ -174,7 +175,7 @@ export default function NavBar({ children }: NavBarProps) {
                               aria-hidden="true"
                             />
                             {item.name}
-                          </a>
+                          </Link>
                         </li>
                       ))}
                     </ul>
@@ -267,15 +268,15 @@ export default function NavBar({ children }: NavBarProps) {
                         {userNavigation.map((item) => (
                           <Menu.Item key={item.name}>
                             {({ active }) => (
-                              <a
-                                href={item.href}
+                              <Link
+                                to={item.href}
                                 className={classNames(
                                   active ? 'bg-gray-50' : '',
                                   'block px-3 py-1 text-sm leading-6 text-gray-900'
                                 )}
                               >
                                 {item.name}
-                              </a>
+                              </Link>
                             )}
                           </Menu.Item>
                         ))}
