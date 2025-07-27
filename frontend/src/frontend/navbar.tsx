@@ -1,8 +1,8 @@
 
-import AliveLogo from '@/assets/alive-logo.png';
-import AliveLogoBlk from '@/assets/alive-logo-blk.png';
-import { Fragment, useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import type { ReactNode } from 'react';
+import AliveLogo from '../assets/alive-logo.png';
+import AliveLogoBlk from '../assets/alive-logo-blk.png';
 import { Dialog, Menu, Transition } from '@headlessui/react'
 import {
   Bars3Icon,

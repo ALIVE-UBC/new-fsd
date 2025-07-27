@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import LoginBackground from '@/assets/login-background.png';
-import AliveLogo from '@/assets/alive-logo-2.png';
-import AliveLogo2 from '@/assets/alive-logo-blk.png';
+import LoginBackground from '../../../assets/login-background.png';
+import AliveLogo from '../../../assets/alive-logo-2.png';
+import AliveLogo2 from '../../../assets/alive-logo-blk.png';
 import { useNavigate } from '@tanstack/react-router';
 
 
