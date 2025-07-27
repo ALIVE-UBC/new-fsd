@@ -9,6 +9,9 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
+  server: {
+    allowedHosts: ['alive.educ.ubc.ca'],
+  },
   resolve: {
     alias: {
       '@': './src',
