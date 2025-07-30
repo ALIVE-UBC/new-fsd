@@ -16,17 +16,15 @@ const sections: Section[] = [
   {
     title: 'Authentication & Authorization',
     models: [
-      { name: 'Groups', addLink: '#', viewLink: '#' },
       { name: 'Users', addLink: '#', viewLink: '#' },
     ],
   },
-  {
-    title: 'Metrics',
-    models: [
-      { name: 'Events', addLink: '#', viewLink: '#' },
-      // You can add more rows as needed
-    ],
-  },
+  // {
+  //   title: 'Metrics',
+  //   models: [
+  //     { name: 'Events', addLink: '#', viewLink: '#' },
+  //   ],
+  // },
 ];
 
 
@@ -47,8 +45,8 @@ export const AdminPage: ReactNode = (
 
           <div className="grid grid-cols-3 text-xs text-gray-500 border-b px-4 py-2 font-semibold">
             <div>MODEL NAME</div>
-            <div>ADD LINK</div>
-            <div>CHANGE OR VIEW LIST LINK</div>
+            <div>CHANGE USERNAME</div>
+            <div>CHANGE PASSWORD</div>
           </div>
 
           {section.models.map((model) => (
@@ -59,7 +57,7 @@ export const AdminPage: ReactNode = (
               <div>{model.name}</div>
               <div>
                 <a href={model.addLink} className="inline-flex items-center justify-center text-gray-500 hover:text-blue-600">
-                  <PlusIcon className="h-5 w-5" />
+                  <PencilSquareIcon className="h-5 w-5" />
                 </a>
               </div>
               <div>
