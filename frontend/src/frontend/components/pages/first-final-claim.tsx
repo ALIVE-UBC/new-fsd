@@ -41,7 +41,7 @@ export function FirstFinalClaim() {
     const fetchFirstFinalClaim = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:5001/api/firstFinalClaim");
+        const response = await fetch("https://alive.educ.ubc.ca/fsd2/api/firstFinalClaim");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

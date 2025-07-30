@@ -19,7 +19,7 @@ export const Login: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5001/api/login', {
+      const response = await fetch('https://alive.educ.ubc.ca/fsd2/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
