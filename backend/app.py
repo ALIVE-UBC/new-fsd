@@ -362,3 +362,73 @@ async def most_commonly_found_evidence():
     finally:
         if conn and conn.is_connected():
             cursor.close()
+
+@app.get("/api/totalVisitedZones")
+async def total_visited_zones():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT
+                JSON_UNQUOTE(JSON_EXTRACT(params, '$.Name')) AS zone_name,
+                COUNT(*) AS visit_count
+            FROM
+                metrics_event
+            WHERE
+                type = 'ZONE_ENTER'
+            GROUP BY
+                zone_name
+            ORDER BY
+                visit_count DESC;
+        """
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return results
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@app.get("/api/firstFinalClaim")
+async def first_final_claim():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            WITH claims_data AS (
+                SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(params, '$.InitialClaim')) as initial_claim,
+                    JSON_UNQUOTE(JSON_EXTRACT(params, '$.FinalClaim')) as final_claim
+                FROM
+                    metrics_event
+                WHERE
+                    type = 'ASSESSMENT_UPDATE'
+                    AND JSON_CONTAINS_PATH(params, 'one', '$.InitialClaim', '$.FinalClaim')
+            )
+            SELECT
+                SUBSTRING_INDEX(COALESCE(initial_claim, final_claim), ' ', 1) AS hypothesis,
+                COUNT(initial_claim) AS initial_claims_count,
+                COUNT(final_claim) AS final_claims_count
+            FROM
+                claims_data
+            GROUP BY
+                hypothesis
+            ORDER BY
+                (COUNT(initial_claim) + COUNT(final_claim)) DESC;
+        """
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return results
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()

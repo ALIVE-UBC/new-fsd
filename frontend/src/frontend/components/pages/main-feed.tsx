@@ -12,6 +12,8 @@ import ExampleChart from '../../../assets/ex.png';
 import HeatMap from '../../../assets/minimap2_font bigger@2x.jpg';
 import { FinalHypothesisPiechart } from "./final-hypothesis-piechart";
 import { MostCommonlyFoundEvidence } from "./most-popular-evidence-piechart";
+import { TotalVisitedZones } from "./total-visited-zones";
+import { FirstFinalClaim } from "./first-final-claim";
 
 
 export function MainFeed() {
@@ -130,65 +132,15 @@ const fetchMostPopularFinalClaim = async () => {
       <div>
          <FinalHypothesisPiechart />
       </div>
-      <div>
-        <MostCommonlyFoundEvidence />
-      </div>
-
-      {/* Charts: first two side by side */}
-      <div className="flex flex-col md:flex-row gap-6">
-  {[1, 2].map((idx) => (
-    <Card key={idx} className="flex-1 text-black">
-      <CardHeader className="flex items-center justify-between mb-4">
-        <CardTitle>Total Visitors</CardTitle>
-        <div className="space-x-2">
-          {['Last 3 months', 'Last 30 days', 'Last 7 days'].map((label) => (
-            <Button key={label} variant="ghost" size="sm">
-              {label}
-            </Button>
-          ))}
+      <div className="flex flex-col md:flex-row items-stretch gap-4">
+        <div className="flex-1 p-4 h-full">
+          <MostCommonlyFoundEvidence />
         </div>
-      </CardHeader>
-      <CardContent className="h-64 flex items-center justify-center">
-        {idx === 1 ? (
-          <img
-            src={HeatMap}
-            alt="Data visualization placeholder"
-            className="h-full w-full object-contain"
-          />
-        ) : (
-          <img
-            src={HeatMap}
-            alt="Data visualization placeholder"
-            className="h-full w-full object-contain"
-          />
-        )}
-      </CardContent>
-      <CardFooter />
-    </Card>
-  ))}
-</div>
-
-      {/* Third chart full width below */}
-      <Card className="text-black">
-        <CardHeader className="flex items-center justify-between mb-4">
-          <CardTitle>Overall Trends</CardTitle>
-          <div className="space-x-2">
-            {['Last Year', 'Last 6 months', 'Last Month'].map((label) => (
-              <Button key={label} variant="ghost" size="sm">
-                {label}
-              </Button>
-            ))}
-          </div>
-        </CardHeader>
-        <CardContent className="h-64 flex items-center justify-center text-gray-500">
-          <img
-            src={ExampleChart}
-            alt="Data visualization placeholder"
-            className="h-full w-full object-contain"
-          />
-        </CardContent>
-        <CardFooter />
-      </Card>
+        <div className="flex-1 p-4 h-full">
+         <TotalVisitedZones />
+        </div>
+      </div>
+      <div><FirstFinalClaim /></div>
     </main>
   );
 }
