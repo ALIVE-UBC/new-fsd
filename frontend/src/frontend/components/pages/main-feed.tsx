@@ -129,18 +129,16 @@ const fetchMostPopularFinalClaim = async () => {
           </Card>
         ))}
       </div>
-      <div>
-         <FinalHypothesisPiechart />
-      </div>
-      <div className="flex flex-col md:flex-row items-stretch gap-4">
-        <div className="flex-1 p-4 h-full">
-          <MostCommonlyFoundEvidence />
-        </div>
-        <div className="flex-1 p-4 h-full">
-         <TotalVisitedZones />
-        </div>
-      </div>
-      <div><FirstFinalClaim /></div>
+      {/* 
+  
+*/}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   
+        <TotalVisitedZones />
+        <MostCommonlyFoundEvidence />
+        <FinalHypothesisPiechart />
+        <FirstFinalClaim />
+</div>
     </main>
   );
 }

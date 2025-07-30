@@ -96,6 +96,39 @@ export function TotalVisitedZones() {
   fetchMostVisitedAreas();
 }, []);
 
+// This is our custom component for rendering wrapped labels
+const CustomXAxisTick = ({ x, y, payload }: { x: number; y: number; payload: { value: string } }) => {
+  const label = payload.value;
+
+  // Split the label string by spaces to get an array of words
+  const words = label.split(' ');
+
+  // If there's only one word, render it normally
+  if (words.length === 1) {
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
+          {label}
+        </text>
+      </g>
+    );
+  }
+
+  // If there are multiple words, render them on separate lines
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
+        {/* Render each word on a new <tspan> element */}
+        {words.map((word, i) => (
+          <tspan x={0} dy={i === 0 ? 0 : "1.2em"} key={i}>
+            {word}
+          </tspan>
+        ))}
+      </text>
+    </g>
+  );
+};
+
   return (
     <Card>
       <CardHeader>
@@ -107,19 +140,23 @@ export function TotalVisitedZones() {
           <BarChart
             accessibilityLayer
             data={chartData}
-            layout="vertical"
+            // layout="vertical"
             margin={{
-              left: 30,
+              bottom: 20
+
             }}
           >
-            <YAxis
+            <XAxis
               dataKey="zone"
               type="category"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
+              angle={-90}       // Rotates the labels to be vertical
+              textAnchor="end"  // Aligns the end of the text to the tick
+              tick={CustomXAxisTick}
             />
-            <XAxis dataKey="visitors" type="number" hide />
+            <YAxis dataKey="visitors" type="number" hide />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}

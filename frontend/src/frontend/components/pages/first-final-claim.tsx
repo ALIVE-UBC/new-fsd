@@ -69,7 +69,7 @@ export function FirstFinalClaim() {
     <Card>
       <CardHeader>
         <CardTitle>Initial vs Final Hypothesis Claims</CardTitle>
-        <CardDescription>Total measure of the number of initial and final claims for each hypothesis</CardDescription>
+        <CardDescription>Total measure of the number of initial and final claims for each </CardDescription>
       </CardHeader>
       <CardContent>
      <ChartContainer config={chartConfig}>
@@ -77,7 +77,7 @@ export function FirstFinalClaim() {
     accessibilityLayer
     data={chartData}
     layout="vertical"
-    margin={{ left: 80 }}
+    margin={{ left: 30 }}
   >
     <CartesianGrid vertical={false} />
     <YAxis
@@ -105,10 +105,9 @@ export function FirstFinalClaim() {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 leading-none font-medium">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="text-muted-foreground leading-none">
-          Showing initial vs final claims
+          Note: hypothesis with 0 claims are not shown in the chart.
         </div>
       </CardFooter>
     </Card>

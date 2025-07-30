@@ -3,6 +3,7 @@ import React, { Fragment, useState } from 'react'
 import type { ReactNode } from 'react';
 import AliveLogo from '../assets/alive-logo.png';
 import AliveLogoBlk from '../assets/alive-logo-blk.png';
+import AliveLogo2 from '../assets/alive_logo_frog.png'; 
 import { Dialog, Menu, Transition } from '@headlessui/react'
 import { Link } from '@tanstack/react-router'
 import {
@@ -27,7 +28,7 @@ const userNavigation = [
   { name: 'Sign out', href: '/login' },
 ]
 
-const userName = 'Alive'
+const userName = 'Alive Team'
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -241,7 +242,7 @@ export default function NavBar({ children }: NavBarProps) {
                       <span className="sr-only">Open user menu</span>
                       <img
                         className="h-8 w-8 rounded-full bg-gray-50"
-                        src={AliveLogoBlk} 
+                        src={AliveLogo2} 
                         alt=""
                       />
                       <span className="hidden lg:flex lg:items-center">

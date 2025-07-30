@@ -8,7 +8,30 @@ import json
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-from passlib.hash import django_pbkdf2_sha256
+from django.conf import settings
+from django.contrib.auth.hashers import check_password
+from pydantic import BaseModel
+
+
+class UserCredentials(BaseModel):
+    username: str
+    password: str
+
+if not settings.configured:
+    settings.configure(
+        # We must provide a SECRET_KEY, even if it's a dummy one for this purpose.
+        SECRET_KEY='a-dummy-secret-key-for-standalone-use',
+        
+        # This tells Django which hashing algorithms to recognize.
+        # This is the default list from a standard Django project.
+        PASSWORD_HASHERS=[
+            'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+            'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+            'django.contrib.auth.hashers.Argon2PasswordHasher',
+            'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+        ]
+    )
+# --- End of Django configuration ---
 
 load_dotenv()
 
@@ -18,11 +41,16 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', '127.0.0.1'),
@@ -163,22 +191,6 @@ async def add_metric_event(request: Request):
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
-    
-
-@app.post("/api/login")
-async def login(username: str = Form(...), password: str = Form(...)):
-    print("--- LOGIN ENDPOINT WAS HIT ---")
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, password FROM auth_user WHERE username = %s", (username,))
-    user = cursor.fetchone()
-    cursor.close()
-    conn.close()
-
-    if (not user) or (not django_pbkdf2_sha256.verify(password, user["password"])):
-        raise HTTPException(status_code=401, detail="Invalid username or password")
-
-    return {"user_id": user["id"], "message": "Login successful"}
 
 @app.get("/api/avgCompletionTime")
 def avg_completion_time():
@@ -431,4 +443,44 @@ async def first_final_claim():
     finally:
         if conn and conn.is_connected():
             cursor.close()
+            conn.close()
+    
+@app.post("/api/login")
+async def login(credentials: UserCredentials):
+    print(f"--- LOGIN ENDPOINT HIT for user: {credentials.username} ---")
+    conn = None
+    cursor = None # Define cursor here to access it in finally
+    try:
+        conn = get_db_connection()
+        if not conn:
+            raise HTTPException(status_code=503, detail="Database connection is unavailable")
+
+        cursor = conn.cursor(dictionary=True)
+        
+        # This part no longer needs its own try block
+        cursor.execute("SELECT id, password FROM auth_user WHERE username = %s AND is_active = 1", (credentials.username,))
+        user = cursor.fetchone()
+
+        # The check_password function now correctly takes the plain-text password first
+        if not user or not check_password(credentials.password, user["password"]):
+            print(f"Login failed: Invalid credentials for user '{credentials.username}'.")
+            # This will now correctly return a 401 error to the frontend
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+
+        print(f"Login successful for user ID: {user['id']}")
+        return {"user_id": user["id"], "message": "Login successful"}
+
+    except mysql.connector.Error as db_err:
+        # Catch specific database errors
+        print(f"A database error occurred: {db_err}")
+        raise HTTPException(status_code=500, detail="A database error occurred.")
+    except Exception as e:
+        # Catch any other unexpected server-side errors
+        print(f"An unexpected error occurred during login: {e}")
+        raise HTTPException(status_code=500, detail="Login Unsuccessful. Please try again.")
+    finally:
+        # Ensure resources are always closed
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
             conn.close()
