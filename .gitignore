@@ -12,3 +12,4 @@ backend/requirements-backend.txt
 backend/venv/
 frontend/.env.production
 ‎backend/deploy-vm.sh
+backend/__pycache__
