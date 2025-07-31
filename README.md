@@ -129,4 +129,36 @@ For the FASTAPI backend of this visualization app (FSD2) as well as FSD1, system
 
 FSD1's script (/etc/systemd/system/oldfsd.service)
 
+```ini
+[Unit]
+Description=FSD Data Logging
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/fsd
+ExecStart=/opt/fsd/venv/bin/gunicorn fsd.wsgi:application --bind 127.0.0.1:8028
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
 FSD2's script (/etc/systemd/system/fsd2-backend.service)
+```ini
+[Unit]
+Description=FSD2 FastAPI Backend
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/fsd2/new-fsd/backend
+Environment=PATH=/opt/fsd2/new-fsd/backend/fsdvenv/bin
+ExecStart=/opt/fsd2/new-fsd/backend/fsdvenv/bin/uvicorn app:app --host 0.0.0.0 --port 5001
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
