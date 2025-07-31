@@ -25,6 +25,17 @@ The Django app developed by the previous team (FSD1) is referred to as the Data 
 
 ## Deployment for Data Logging (FSD1 App) and Visualization Dashboard (FSD2 App)
 
+This app is deployed on a UBC VM using nginx. The frontend is served via a React static build, and the backend is served at port 5001. In order to redeploy a new version after the source code has been modified, please do the following steps:
+
+1. git pull the new changes
+2. cd into `frontend`
+3. run `npm run build`. This generates static build files; the new frontend has been successfully deployed as of this step. nginx has been configured to automatically use the build files at this location
+4. cd into `backend`
+5. run `sudo systemctl restart fsd2-backend.service`
+6. OPTIONAL: run `sudo nginx -t` to test for errors
+7. run `sudo systemctl reload nginx` to reload the backend, which is being served dynamically. 
+8. Done! You have now redeployed
+
 ## Other information
 
 FSD1's source code is exactly the same as the last group's, except for a model.py. The new model.py is in the [old-fsd branch](https://github.com/ALIVE-UBC/new-fsd/tree/old-fsd). The only change was to add the theorizer events into EventType, so our new theorizer data can be logged properly into the database.
