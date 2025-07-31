@@ -4,7 +4,7 @@
 
 This project is developed by [Centre for Digital Media](https://thecdm.ca/) students in Summer of 2025 for [University of British Columbia ALIVE Research Lab](https://alivelab.ca/). More information can be found at [the project page](https://thecdm.ca/projects/industry-projects/https://thecdm.ca/projects/falling-skies-25-ubc-alive-research-lab).
 
-This repo contains the source code for the data visualization dashboard for Falling Skies. The site is currently deployed and useable at [https://alive.educ.ubc.ca/fsd2/](https://alive.educ.ubc.ca/fsd2/). A status monitor hsa been set up for the site [here](https://stats.uptimerobot.com/7brjCd2N28).
+This repo contains the source code for the data visualization dashboard for Falling Skies. The site is currently deployed and useable at [https://alive.educ.ubc.ca/fsd2/](https://alive.educ.ubc.ca/fsd2/). A status monitor has been set up for the site [here](https://stats.uptimerobot.com/7brjCd2N28). OPTIONAL: In order to receive notifications when the site is down, please create an account on that site and create a new monitor.
 
 
 ## Local setup instructions
