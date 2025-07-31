@@ -122,3 +122,11 @@ If FSD1 (the Django app)'s source code has been updated, use a similar method to
 1. run `sudo systemctl restart oldfsd.service`
 2. OPTIONAL: run `sudo nginx -t` to test for errors
 3. run `sudo systemctl reload nginx`
+
+The database is running at port 3036; FSD1 is running at port 8028
+
+For the FASTAPI backend of this visualization app (FSD2) as well as FSD1, systemd service scripts have been set up so that the apps are continuously running at the specified ports. This allows them to still be active after a dev has logged out of the terminal. These scripts are located at `/etc/systemd/system`. 
+
+FSD1's script (/etc/systemd/system/oldfsd.service)
+
+FSD2's script (/etc/systemd/system/fsd2-backend.service)
