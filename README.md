@@ -25,9 +25,13 @@ The Django app developed by the previous team (FSD1) is referred to as the Data 
 
 ## Deployment for Data Logging (FSD1 App) and Visualization Dashboard (FSD2 App)
 
-This app is deployed on a UBC VM using nginx. The frontend is served via a React static build, and the backend is served at port 5001. In order to redeploy a new version after the source code has been modified, please do the following steps:
+This app is deployed on a UBC VM using nginx. The frontend is served via a React static build, and the backend is served at port 5001. 
 
-0. run `cd /opt/fsd2/new-fsd/` to go to the source code folder.
+Activate Cisco Secure Client, UBC's VPN. Log in to the UBC VM as the root user in your terminal/shell. The command I (CDM student dev) used was `ssh -t jsong69@alive.educ.ubc.ca sudo -i`; yours will likely be different. I'm assuming yours will be XYZ@alive.educ.ubc.ca. At the prompt, enter your password - note that it is likely different from your VPN password.
+
+In order to redeploy a new version after the source code has been modified, please do the following steps:
+
+0. run `cd /opt/fsd2/new-fsd/` to go to the source code folder. Note that the source code is not in the root folder, it is in the layer *under*. The path is `/opt/fsd2/new-fsd/`.
 1. `git pull` the new changes
 2. cd into `frontend`
 3. run `npm run build`. This generates static build files; the new frontend has been successfully deployed as of this step. nginx has been configured to automatically use the build files at this location
