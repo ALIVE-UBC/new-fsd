@@ -1,12 +1,12 @@
-from fastapi import FastAPI, HTTPException, Request, Form
+from fastapi import FastAPI, HTTPException, Request, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 import mysql.connector
 from mysql.connector import Error
 import json
 import os
-from datetime import datetime
+from datetime import datetime, date
 from dotenv import load_dotenv
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
@@ -35,7 +35,7 @@ if not settings.configured:
 
 load_dotenv()
 
-print('DEBUG: os.environ:', dict(os.environ))
+#print('DEBUG: os.environ:', dict(os.environ))
 
 app = FastAPI()
 
@@ -58,7 +58,7 @@ DB_CONFIG = {
     'charset': 'utf8mb4'
 }
 
-print('DEBUG: DB_CONFIG:', DB_CONFIG)
+#print('DEBUG: DB_CONFIG:', DB_CONFIG)
 
 class MetricEvent(BaseModel):
     UserId: int
@@ -82,18 +82,57 @@ def home():
     return {"message": "Hello, FastAPI!"}
 
 @app.get("/api/players")
-def get_players():
+def get_players(
+    start_date: Optional[date] = Query(None, description=""),
+    end_date: Optional[date] = Query(None, description=""),
+    event_type: Optional[str] = Query(None, description=""),
+    limit: int = Query(50, ge=1, le=100, description=""),
+    offset: int = Query(0, ge=0, description="")
+):
     try:
         connection = get_db_connection()
         if not connection:
             raise HTTPException(status_code=500, detail="Database connection failed")
         cursor = connection.cursor(dictionary=True)
-        query = "SELECT * FROM metrics_event ORDER BY datetime DESC"
-        cursor.execute(query)
+        query = "SELECT * FROM metrics_event WHERE 1=1"
+        params = []
+        
+        if start_date:
+            query += " AND DATE(datetime) >= %s"
+            params.append(start_date)
+        
+        if end_date:
+            query += " AND DATE(datetime) <= %s"
+            params.append(end_date)
+        
+        if event_type:
+            query += " AND type = %s"
+            params.append(event_type)
+        
+        query += " ORDER BY datetime DESC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+        
+        cursor.execute(query, params)
         results = cursor.fetchall()
-        print('DEBUG: results from DB:', results)
-        cursor.execute("SHOW TABLES;")
-        print('DEBUG: tables:', cursor.fetchall())
+        
+        count_query = "SELECT COUNT(*) as total FROM metrics_event WHERE 1=1"
+        count_params = []
+        
+        if start_date:
+            count_query += " AND DATE(datetime) >= %s"
+            count_params.append(start_date)
+        
+        if end_date:
+            count_query += " AND DATE(datetime) <= %s"
+            count_params.append(end_date)
+        
+        if event_type:
+            count_query += " AND type = %s"
+            count_params.append(event_type)
+        
+        cursor.execute(count_query, count_params)
+        total_count = cursor.fetchone()['total']
+        
         players = []
         for row in results:
             players.append({
@@ -104,7 +143,15 @@ def get_players():
             })
         cursor.close()
         connection.close()
-        return players
+        return {
+            "data": players,
+            "pagination": {
+                "limit": limit,
+                "offset": offset,
+                "count": len(players),
+                "total": total_count
+            }
+        }
     except Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:

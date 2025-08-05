@@ -17,10 +17,11 @@ function PlayerTableComponent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     fetchPlayers();
-  }, []);
+  }, [currentPage]);
 
   const formatDateTime = (dateTimeString: string) => {
     try {
@@ -40,30 +41,45 @@ function PlayerTableComponent() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('https://alive.educ.ubc.ca/fsd2/api/players');
+      const offset = (currentPage - 1) * itemsPerPage;
+      const response = await fetch(`https://alive.educ.ubc.ca/fsd2/api/players?limit=${itemsPerPage}&offset=${offset}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setPlayers(data);
+      
+    
+      if (data.data && data.pagination) {
+      
+        setPlayers(data.data);
+        setTotalCount(data.pagination.total || data.pagination.count || 0);
+      } else if (Array.isArray(data)) {
+       
+        setPlayers(data);
+        setTotalCount(data.length);
+      } else {
+     
+        setPlayers([]);
+        setTotalCount(0);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch players');
       console.error('Error fetching players:', err);
+      setPlayers([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredPlayers = players.filter(player =>
+  const filteredPlayers = (players || []).filter(player =>
     player.user_id.toString().includes(searchTerm) ||
     player.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
     JSON.stringify(player.params).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentPlayers = filteredPlayers.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const currentPlayers = filteredPlayers;
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
@@ -156,6 +172,10 @@ function PlayerTableComponent() {
 
       {filteredPlayers.length > 0 && (
         <div className="flex items-center justify-center gap-4 pt-4 text-sm text-gray-600">
+          <div className="text-gray-500">
+            Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} entries
+          </div>
+          
           <button 
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
