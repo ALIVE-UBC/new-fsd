@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Form
+from fastapi import FastAPI, HTTPException, Request, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
@@ -6,7 +6,7 @@ import mysql.connector
 from mysql.connector import Error
 import json
 import os
-from datetime import datetime
+from datetime import datetime, date
 from dotenv import load_dotenv
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
@@ -35,7 +35,7 @@ if not settings.configured:
 
 load_dotenv()
 
-print('DEBUG: os.environ:', dict(os.environ))
+#print('DEBUG: os.environ:', dict(os.environ))
 
 app = FastAPI()
 
@@ -58,7 +58,7 @@ DB_CONFIG = {
     'charset': 'utf8mb4'
 }
 
-print('DEBUG: DB_CONFIG:', DB_CONFIG)
+#print('DEBUG: DB_CONFIG:', DB_CONFIG)
 
 class MetricEvent(BaseModel):
     UserId: int
@@ -94,12 +94,29 @@ def get_players(
         if not connection:
             raise HTTPException(status_code=500, detail="Database connection failed")
         cursor = connection.cursor(dictionary=True)
-        query = "SELECT * FROM metrics_event ORDER BY datetime DESC"
-        cursor.execute(query)
+        query = "SELECT * FROM metrics_event WHERE 1=1"
+        params = []
+        
+        if start_date:
+            query += " AND DATE(datetime) >= %s"
+            params.append(start_date)
+        
+        if end_date:
+            query += " AND DATE(datetime) <= %s"
+            params.append(end_date)
+        
+        if event_type:
+            query += " AND type = %s"
+            params.append(event_type)
+        
+        query += " ORDER BY datetime DESC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+        
+        cursor.execute(query, params)
         results = cursor.fetchall()
-        print('DEBUG: results from DB:', results)
+   #     print('DEBUG: results from DB:', results)
         cursor.execute("SHOW TABLES;")
-        print('DEBUG: tables:', cursor.fetchall())
+     #   print('DEBUG: tables:', cursor.fetchall())
         players = []
         for row in results:
             players.append({
