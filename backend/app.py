@@ -114,9 +114,25 @@ def get_players(
         
         cursor.execute(query, params)
         results = cursor.fetchall()
-   #     print('DEBUG: results from DB:', results)
-        cursor.execute("SHOW TABLES;")
-     #   print('DEBUG: tables:', cursor.fetchall())
+        
+        count_query = "SELECT COUNT(*) as total FROM metrics_event WHERE 1=1"
+        count_params = []
+        
+        if start_date:
+            count_query += " AND DATE(datetime) >= %s"
+            count_params.append(start_date)
+        
+        if end_date:
+            count_query += " AND DATE(datetime) <= %s"
+            count_params.append(end_date)
+        
+        if event_type:
+            count_query += " AND type = %s"
+            count_params.append(event_type)
+        
+        cursor.execute(count_query, count_params)
+        total_count = cursor.fetchone()['total']
+        
         players = []
         for row in results:
             players.append({
@@ -132,7 +148,8 @@ def get_players(
             "pagination": {
                 "limit": limit,
                 "offset": offset,
-                "count": len(players)
+                "count": len(players),
+                "total": total_count
             }
         }
     except Error as e:
