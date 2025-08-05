@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 import mysql.connector
 from mysql.connector import Error
@@ -82,7 +82,13 @@ def home():
     return {"message": "Hello, FastAPI!"}
 
 @app.get("/api/players")
-def get_players():
+def get_players(
+    start_date: Optional[date] = Query(None, description=""),
+    end_date: Optional[date] = Query(None, description=""),
+    event_type: Optional[str] = Query(None, description=""),
+    limit: int = Query(50, ge=1, le=100, description=""),
+    offset: int = Query(0, ge=0, description="")
+):
     try:
         connection = get_db_connection()
         if not connection:
@@ -104,7 +110,14 @@ def get_players():
             })
         cursor.close()
         connection.close()
-        return players
+        return {
+            "data": players,
+            "pagination": {
+                "limit": limit,
+                "offset": offset,
+                "count": len(players)
+            }
+        }
     except Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
